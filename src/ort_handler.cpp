@@ -8,6 +8,7 @@ int BasicOrtHandler::Init(
     std::wstring _w_onnx_path(to_wstring(_onnx_path));
     onnx_path = _w_onnx_path.data();
     initialize_handler();
+    return 0;
 }
 
 void BasicOrtHandler::initialize_handler()

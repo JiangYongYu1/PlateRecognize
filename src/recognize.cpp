@@ -188,6 +188,7 @@ int Recognize::postprocess(std::vector<Ort::Value> &output_tensors,
     out_box_score.reg_out = output_label;
     out_box_score.score = 1.0;
     re_result.RegOuts.push_back(out_box_score);
+    return 0;
 }
 
 int Recognize::run(const cv::Mat &image, 

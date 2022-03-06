@@ -140,6 +140,7 @@ int Detect::get_recognize_data(const std::vector<std::vector<float>>& nms_out,
         per_detect_out.push_back(theta);
         detect_out.emplace_back(per_detect_out);
     }
+    return 0;
 }
 
 int Detect::postprocess(std::vector<Ort::Value> &output_tensors,
@@ -248,6 +249,7 @@ int Detect::postprocess(std::vector<Ort::Value> &output_tensors,
             det_result.boxthetas.push_back(per_box_theta);
         }
     }
+    return 0;
 }
 
 int Detect::run(const cv::Mat &mat, DetectionResult& detect_result){
