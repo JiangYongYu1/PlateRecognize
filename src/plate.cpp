@@ -36,6 +36,8 @@ Plate::~Plate()
 
 int Plate::Init(const std::string &config_path)
 {
+    priv->detector = new Detect();
+    priv->recognizor = new Recognize();
     priv->detector->InitModel(config_path);
     priv->recognizor->InitModel(config_path);
     return 0;
