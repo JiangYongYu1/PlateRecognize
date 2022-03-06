@@ -258,7 +258,7 @@ int Detect::run(const cv::Mat &mat, DetectionResult& detect_result){
     this->resize_with_pad(mat, mat_resize, resize_info, 
                           cv::Size(priv->img_size, priv->img_size), 
                           std::vector<int> {0, 0, 0}, cv::INTER_NEAREST);
-    Ort::Value input_tensor = this->transform(mat);
+    Ort::Value input_tensor = this->transform(mat_resize);
     auto output_tensors = ort_session->Run(
         Ort::RunOptions{nullptr}, input_node_names.data(),
         &input_tensor, 1, output_node_names.data(), num_outputs
