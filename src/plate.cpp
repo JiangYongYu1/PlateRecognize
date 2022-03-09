@@ -53,11 +53,11 @@ int Plate::Run(const std::string& img_path,
     return 0;
 }
 
-int Plate::Run(const cv::Mat& img, 
-               DetectionResult &detect_out, 
-               RecognizeResult &reg_out)
-{
-    priv->detector->run(img, detect_out);
-    priv->recognizor->run(img, detect_out, reg_out);
-    return 0;
-}
+// int Plate::Run(const cv::Mat& img, 
+//                DetectionResult &detect_out, 
+//                RecognizeResult &reg_out)
+// {
+//     priv->detector->run(img, detect_out);
+//     priv->recognizor->run(img, detect_out, reg_out);
+//     return 0;
+// }

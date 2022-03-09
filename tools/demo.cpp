@@ -1,4 +1,10 @@
-#include "plate.hpp"
+#include <Windows.h>
+#include "string"
+
+#include "plate_sample.hpp"
+
+
+typedef void (*FUNADDR)(void**);
 
 int main(int argc, char *argv[])
 {
@@ -10,27 +16,38 @@ int main(int argc, char *argv[])
     std::string config_file = argv[1];
     std::string image_name = argv[2];
 
-    Plate plate_instance;
-    plate_instance.Init(config_file);
+    HINSTANCE dllDemo = ::LoadLibrary("plate_recognize.dll");
+	DWORD dwErrNO = GetLastError();
+	if (dwErrNO) {
+		std::cout << "dll open errno : " + std::to_string(dwErrNO) << std::endl;
+	}
 
-    for(int i=0; i< 100; i++)
-    {
-        DetectionResult detect_result;
-        RecognizeResult recog_result;
-        plate_instance.Run(image_name, detect_result, recog_result);
-        // plate_recognizor.RecForward(cv_image, &recog_result);
+	if (dllDemo) {
+		printf("load dll demo\n");
+		FUNADDR getclass;
+		getclass = (FUNADDR)GetProcAddress(dllDemo, "GetPlateObject");
 
-        std::cout<<"图片 " <<image_name<<" 的识别结果是: \n";
-        for(int i=0; i < recog_result.RegOuts.size(); i++)
+        void* general_pointor;
+		getclass(&general_pointor);
+		PlateSample* plate_instance = (PlateSample*)general_pointor;
+        plate_instance->Init(config_file);
+        for(int i = 0; i < 1000; i++)
         {
-            for (int j=0; j<recog_result.RegOuts[i].reg_out.size(); j++)
+            DetectionResult detect_result;
+            RecognizeResult recog_result;
+            plate_instance->Run(image_name, detect_result, recog_result);
+            std::cout<<"图片 " <<image_name<<" 的识别结果是: \n";
+            for(int i=0; i < recog_result.RegOuts.size(); i++)
             {
-                std::cout<<recog_result.RegOuts[i].reg_out[j];
+                for (int j=0; j<recog_result.RegOuts[i].reg_out.size(); j++)
+                {
+                    std::cout<<recog_result.RegOuts[i].reg_out[j];
+                }
+                std::cout<<"\n";
             }
-            std::cout<<"\n";
+            std::cout<<"识别完成!"<<std::endl;
         }
-        std::cout<<"识别完成!"<<std::endl;
-    }
 
+    }
     return 0;
 }

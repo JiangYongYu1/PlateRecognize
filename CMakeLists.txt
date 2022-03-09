@@ -36,12 +36,12 @@ target_link_libraries(plate_recognize
     ${OpenCV_LIBS}
 )
 
-add_library(plate_recognize_static STATIC ${library_src})
-SET_TARGET_PROPERTIES(plate_recognize_static PROPERTIES OUTPUT_NAME "plate_recognize")
-target_link_libraries(plate_recognize_static
-    onnxruntime
-    ${OpenCV_LIBS}
-)
+# add_library(plate_recognize_static STATIC ${library_src})
+# SET_TARGET_PROPERTIES(plate_recognize_static PROPERTIES OUTPUT_NAME "plate_recognize")
+# target_link_libraries(plate_recognize_static
+#     onnxruntime
+#     ${OpenCV_LIBS}
+# )
 
 
 file(GLOB_RECURSE sample_src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} tools/*.cpp)

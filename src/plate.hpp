@@ -3,10 +3,10 @@
 
 #include "opencv2/opencv.hpp"
 
-#include "plate_info.hpp"
+#include "plate_sample.hpp"
 
 struct PlatePriv;
-class __declspec(dllexport) Plate{
+class Plate: public PlateSample{
     public:
         Plate();
         ~Plate();
@@ -14,9 +14,9 @@ class __declspec(dllexport) Plate{
         int Run(const std::string& img_path, 
                 DetectionResult &detect_out, 
                 RecognizeResult &reg_out);
-        int Run(const cv::Mat& img, 
-                DetectionResult &detect_out, 
-                RecognizeResult &reg_out);
+        // int Run(const cv::Mat& img, 
+        //         DetectionResult &detect_out, 
+        //         RecognizeResult &reg_out);
     private:
         PlatePriv *priv = nullptr;
 };
