@@ -15,10 +15,6 @@ Recognize::~Recognize() {
         delete priv;
     }
     priv = nullptr;
-    if(module_){
-        delete module_;
-    }
-    module_ = nullptr;
 }
 
 int Recognize::InitModel(const std::string& config_file) {
@@ -208,7 +204,7 @@ int Recognize::run(const cv::Mat &image,
                                  priv->img_size_h, priv->img_size_w, i);
         std::vector<torch::jit::IValue> input_tensor = this->transform(resize_img);
         auto output_tensors = this->module_->forward(input_tensor);
-        auto outputs = output_tensors.toTuple()->elements()[0].toTensor();
+        auto outputs = output_tensors.toTensor().to(torch::kFloat).cpu();
         postprocess(outputs, priv->labels, RecognizeResult);
     }
     return 0;

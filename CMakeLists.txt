@@ -86,9 +86,3 @@ target_link_libraries(plate_recognize
 
 file(GLOB_RECURSE sample_src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} tools/*.cpp)
 add_executable(plate_demo ${sample_src})
-target_link_libraries(plate_demo 
-    plate_recognize
-    ${OpenCV_LIBS}
-    ${TORCH_LIBRARIES}
-    ${CUDA_LIBS}
-)

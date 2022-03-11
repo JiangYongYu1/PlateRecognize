@@ -10,9 +10,9 @@
 class BasicOrtHandler {
     protected:
         std::string torch_model_path;
-        torch::jit::script::Module* module_ = nullptr;
+        std::unique_ptr<torch::jit::script::Module> module_;
         torch::Device device_ = torch::kCPU;
-        bool half_;
+        bool half_ = false;
 
     protected:
         BasicOrtHandler() = default;

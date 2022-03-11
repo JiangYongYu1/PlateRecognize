@@ -12,7 +12,7 @@ int BasicOrtHandler::Init(
 void BasicOrtHandler::initialize_handler()
 {
     try {
-        *module_ = torch::jit::load(torch_model_path);
+        module_ = std::make_unique<torch::jit::script::Module>(torch::jit::load(torch_model_path));
     }
     catch (const c10::Error& e) {
         std::cerr << "Error loading the model!\n";
@@ -30,7 +30,4 @@ void BasicOrtHandler::initialize_handler()
 
 BasicOrtHandler::~BasicOrtHandler()
 {
-  if (module_)
-    delete module_;
-  module_ = nullptr;
 }

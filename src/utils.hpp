@@ -13,8 +13,6 @@ struct PointF {
 
 static constexpr const float _PI = 3.1415926f;
 
-std::wstring to_wstring(const std::string &str);
-std::string to_string(const std::wstring &wstr);
 /**
  * @brief Create a tensor object
  * 
