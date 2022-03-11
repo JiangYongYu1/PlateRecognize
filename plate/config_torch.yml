@@ -1,0 +1,13 @@
+%YAML:1.0
+IMG_SIZE: 640
+THRESHOLD: 0.5
+NMS: 0.5
+DETECT_MODEL_PATH: "D:/work/CPlusProject/PlateRecognize/plate/center_text_mbv3.torchscript"
+# MODEL: "center_text1.onnx"
+INPUT: "data"
+OUTPUT: "output"
+RECOGNIZE_MODEL_PATH: "D:/work/CPlusProject/PlateRecognize/plate/plate_reg_lite.torchscript"
+IMG_SIZE_H: 32
+IMG_SIZE_W: 128
+LABEL_PATH: "D:/work/CPlusProject/PlateRecognize/plate/char.txt"
+

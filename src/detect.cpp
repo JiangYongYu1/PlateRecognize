@@ -20,9 +20,9 @@ Detect::Detect()
 };
 
 Detect::~Detect() {
-    if (ort_session)
-        delete ort_session;
-    ort_session = nullptr;
+    if (module_)
+        delete module_;
+    module_ = nullptr;
     if (priv)
         delete priv;
     priv = nullptr;
@@ -35,7 +35,14 @@ int Detect::InitModel(const std::string& config_file)
     priv->nms_conf = (float)config["NMS"];
     priv->threshold = (float)config["THRESHOLD"];
     std::string detect_model_path = (std::string)config["DETECT_MODEL_PATH"];
-    Init(detect_model_path, 1);
+    torch::DeviceType device_type;
+    if (torch::cuda::is_available()) {
+        device_type = torch::kCUDA;
+    }
+    else {
+        device_type = torch::kCPU;
+    }
+    Init(detect_model_path, device_type);
     return 0;
 }
 
@@ -85,12 +92,11 @@ int Detect::resize_with_pad(const cv::Mat &img, cv::Mat &img_out, ResizeInfo &re
     return 0;
 }
 
-Ort::Value Detect::transform(const cv::Mat &mat_rs){
+std::vector<torch::jit::IValue> Detect::transform(const cv::Mat &mat_rs){
     cv::Mat mat_resize = mat_rs;
     bool is_scale_ = true;
     Normalize(&mat_resize, is_scale_);
-    return create_tensor(mat_resize, input_node_dims, 
-    memory_info_handler, input_values_handler);
+    return create_tensor(mat_resize, device_, half_);
 }
 
 int Detect::get_ids(const float* heatmap, int h, int w, float thresh, std::vector<int>& ids)
@@ -143,18 +149,16 @@ int Detect::get_recognize_data(const std::vector<std::vector<float>>& nms_out,
     return 0;
 }
 
-int Detect::postprocess(std::vector<Ort::Value> &output_tensors,
+int Detect::postprocess(const torch::Tensor& detections,
                         float prob_threshold,
                         float nms_thresh,
                         float ratio_h,
                         float ratio_w,
                         DetectionResult &det_result)
 {
-    Ort::Value &output_pred = output_tensors.at(0);
-    auto output_pred_dims = output_pred.GetTypeInfo().GetTensorTypeAndShapeInfo().GetShape();
-    const float *heatmap_ = output_pred.GetTensorMutableData<float>();
-    int fea_h = output_pred_dims[2];
-    int fea_w = output_pred_dims[3];
+    const float *heatmap_ = (float*)detections.data_ptr();
+    int fea_h = detections.size(2);
+    int fea_w = detections.size(3);
     int spacial_size = fea_w * fea_h;
     const float *x0 = heatmap_ + spacial_size;
     const float *y0 = x0 + spacial_size;
@@ -253,17 +257,18 @@ int Detect::postprocess(std::vector<Ort::Value> &output_tensors,
 }
 
 int Detect::run(const cv::Mat &mat, DetectionResult& detect_result){
+    torch::NoGradGuard no_grad;
     cv::Mat mat_resize;
     ResizeInfo resize_info;
     this->resize_with_pad(mat, mat_resize, resize_info, 
                           cv::Size(priv->img_size, priv->img_size), 
                           std::vector<int> {0, 0, 0}, cv::INTER_NEAREST);
-    Ort::Value input_tensor = this->transform(mat_resize);
-    auto output_tensors = ort_session->Run(
-        Ort::RunOptions{nullptr}, input_node_names.data(),
-        &input_tensor, 1, output_node_names.data(), num_outputs
+    std::vector<torch::jit::IValue> input_tensor = this->transform(mat_resize);
+    auto output_tensors = module_->forward(
+        input_tensor
     );
-    this->postprocess(output_tensors, priv->threshold,
+    auto detections = output_tensors.toTuple()->elements()[0].toTensor();
+    this->postprocess(detections, priv->threshold,
                       priv->nms_conf, resize_info.ratio_h,
                       resize_info.ratio_w, detect_result);
     return 0;

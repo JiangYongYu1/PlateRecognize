@@ -4,10 +4,7 @@
 #include "numeric"
 
 #include "opencv2/opencv.hpp"
-#include "onnxruntime_cxx_api.h"
-#include "tensorrt_provider_factory.h"
-
-#include "utils.hpp"
+#include "torch/torch.h"
 
 struct PointF {
     float x;
@@ -27,9 +24,7 @@ std::string to_string(const std::wstring &wstr);
  * @param tensor_value_handler 
  * @return Ort::Value 
  */
-Ort::Value create_tensor(const cv::Mat &mat, const std::vector<int64_t> &tensor_dims, 
-                         const Ort::MemoryInfo &memory_info_handler, 
-                         std::vector<float>& tensor_value_handler) throw(std::runtime_error);
+std::vector<torch::jit::IValue> create_tensor(const cv::Mat& mat, const torch::Device& device, bool half);
 
 void Normalize(cv::Mat *im, const std::vector<float> &mean, 
               const std::vector<float> &scale, const bool is_scale);

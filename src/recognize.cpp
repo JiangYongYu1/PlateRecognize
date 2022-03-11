@@ -15,10 +15,10 @@ Recognize::~Recognize() {
         delete priv;
     }
     priv = nullptr;
-    if(ort_session){
-        delete ort_session;
+    if(module_){
+        delete module_;
     }
-    ort_session = nullptr;
+    module_ = nullptr;
 }
 
 int Recognize::InitModel(const std::string& config_file) {
@@ -28,7 +28,14 @@ int Recognize::InitModel(const std::string& config_file) {
     std::string label_path = (std::string) config["LABEL_PATH"];
     ReadDict(label_path, priv->labels);
     std::string recognize_model_path = (std::string)config["RECOGNIZE_MODEL_PATH"];
-    Init(recognize_model_path, 1);
+    torch::DeviceType device_type;
+    if (torch::cuda::is_available()) {
+        device_type = torch::kCUDA;
+    }
+    else {
+        device_type = torch::kCPU;
+    }
+    Init(recognize_model_path, device_type);
     return 0;
 }
 
@@ -112,22 +119,19 @@ int Recognize::GetRotateCropImage(const cv::Mat &srcimage, cv::Mat &out_image,
     return 0;
 }
 
-Ort::Value Recognize::transform(const cv::Mat &mat_rs)
+std::vector<torch::jit::IValue> Recognize::transform(const cv::Mat &mat_rs)
 {
-    return create_tensor(mat_rs, input_node_dims, 
-    memory_info_handler, input_values_handler);
+    return create_tensor(mat_rs, device_, half_);
 }
 
-int Recognize::postprocess(std::vector<Ort::Value> &output_tensors,
+int Recognize::postprocess(const torch::Tensor &output_tensors,
                            const std::vector<std::string> &labels, 
                            RecognizeResult &re_result)
 {
-    Ort::Value &output_pred = output_tensors.at(0);
-    auto output_pred_dims = output_pred.GetTypeInfo().GetTensorTypeAndShapeInfo().GetShape();
-    const float *heatmap_ = output_pred.GetTensorMutableData<float>();
-    int channel = output_pred_dims[1];
-    int height = output_pred_dims[2];
-    int width = output_pred_dims[3];
+    const float *heatmap_ = (float *)output_tensors.data_ptr();
+    int channel = output_tensors.size(1);
+    int height = output_tensors.size(2);
+    int width = output_tensors.size(3);
 
     std::shared_ptr<BlobData> bottom_blob(new BlobData(1, channel, height, width));
     std::vector<int> orders = {0, 3, 2, 1};
@@ -202,13 +206,10 @@ int Recognize::run(const cv::Mat &image,
         cv::Mat resize_img;
         this->GetRotateCropImage(image, resize_img, detection_result.boxthetas[i], 
                                  priv->img_size_h, priv->img_size_w, i);
-        Ort::Value input_tensor = this->transform(resize_img);
-        auto output_tensors = ort_session->Run(Ort::RunOptions{nullptr}, 
-                                               input_node_names.data(), 
-                                               &input_tensor, 1, 
-                                               output_node_names.data(), 
-                                               num_outputs);
-        postprocess(output_tensors, priv->labels, RecognizeResult);
+        std::vector<torch::jit::IValue> input_tensor = this->transform(resize_img);
+        auto output_tensors = this->module_->forward(input_tensor);
+        auto outputs = output_tensors.toTuple()->elements()[0].toTensor();
+        postprocess(outputs, priv->labels, RecognizeResult);
     }
     return 0;
 }

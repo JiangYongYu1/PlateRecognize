@@ -5,6 +5,7 @@
 #include "plate_info.hpp"
 #include "ort_handler.hpp"
 #include "lanms.hpp"
+#include "utils.hpp"
 
 struct PlateDetectorPrivate;
 
@@ -18,7 +19,7 @@ class Detect: public BasicOrtHandler {
         ~Detect() override;
 
     protected:
-        Ort::Value transform(const cv::Mat &mat_rs) override;
+        std::vector<torch::jit::IValue> transform(const cv::Mat &mat_rs) override;
 
     private:
         /**
@@ -35,7 +36,7 @@ class Detect: public BasicOrtHandler {
         int resize_with_pad(const cv::Mat &img, cv::Mat &img_out, ResizeInfo &resize_info, 
                             const cv::Size& new_shape, const std::vector<int>& color, 
                             int interp);
-        int postprocess(std::vector<Ort::Value> &output_tensors,
+        int postprocess(const torch::Tensor& detections,
                         float prob_threshold,
                         float nms_thresh,
                         float ratio_h,

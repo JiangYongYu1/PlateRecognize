@@ -23,37 +23,21 @@ std::wstring to_wstring(const std::string &str)
   return wstr;
 }
 
-Ort::Value create_tensor(const cv::Mat &mat, const std::vector<int64_t> &tensor_dims, 
-                         const Ort::MemoryInfo &memory_info_handler, 
-                         std::vector<float>& tensor_value_handler) 
-throw(std::runtime_error)
+std::vector<torch::jit::IValue> create_tensor(const cv::Mat& mat, const torch::Device& device, bool half)
 {
+  torch::NoGradGuard no_grad;
   const unsigned int rows = mat.rows;
   const unsigned int cols = mat.cols;
   const unsigned int channels = mat.channels();
 
-  if (tensor_dims.size() != 4) throw std::runtime_error("dims mismatch.");
-  if (tensor_dims.at(0) != 1) throw std::runtime_error("batch != 1");
-  
-  const unsigned int target_channel = tensor_dims.at(1);
-  const unsigned int target_height = tensor_dims.at(2);
-  const unsigned int target_width = tensor_dims.at(3);
-  const unsigned int target_tensor_size = target_channel * target_height * target_width;
-  if (target_channel != channels) throw std::runtime_error("channel mismatch.");
-  if (target_height != rows) throw std::runtime_error("height mismatch.");
-  if (target_width != cols) throw std::runtime_error("width mismatch.");
-
-  tensor_value_handler.resize(target_tensor_size);
-
-  std::vector<cv::Mat> mat_channels;
-  cv::split(mat, mat_channels);
-  for(unsigned int i = 0; i < channels; ++i){
-    std::memcpy(tensor_value_handler.data() + i * (target_height * target_width),
-                mat_channels.at(i).data, target_height * target_width * sizeof(float));
+  auto tensor_img = torch::from_blob(mat.data, { 1, rows, cols, channels }, torch::kFloat32).to(device);
+  tensor_img = tensor_img.permute({ 0, 3, 1, 2 }).contiguous();
+  if (half) {
+      tensor_img = tensor_img.to(torch::kHalf);
   }
-  return Ort::Value::CreateTensor<float>(memory_info_handler, tensor_value_handler.data(), 
-                                         target_tensor_size, tensor_dims.data(), 
-                                         tensor_dims.size());
+  std::vector<torch::jit::IValue> inputs;
+  inputs.emplace_back(tensor_img);
+  return inputs;
 }
 
 void Normalize(cv::Mat *im, const std::vector<float> &mean, 

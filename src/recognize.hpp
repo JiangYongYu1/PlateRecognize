@@ -25,11 +25,11 @@ class Recognize: public BasicOrtHandler {
                 const DetectionResult &detection_result, 
                 RecognizeResult &RecognizeResult);
     protected:
-        Ort::Value transform(const cv::Mat &mat_rs) override;
+        std::vector<torch::jit::IValue> transform(const cv::Mat &mat_rs) override;
     private:
         int GetRotateCropImage(const cv::Mat &srcimage, cv::Mat &out_image, 
                                const DetBoxTheta &boxtheta, int aim_h, int aim_w, int im_idx);
-        int postprocess(std::vector<Ort::Value> &output_tensors,
+        int postprocess(const torch::Tensor &output_tensors,
                         const std::vector<std::string> &labels, 
                         RecognizeResult &re_result);
     private:

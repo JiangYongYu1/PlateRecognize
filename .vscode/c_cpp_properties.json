@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "D:/work/thirdparty/compiled/onnxruntime-win-x64-gpu-1.10.0/include",
-                "D:/work/thirdparty/compiled/opencv452_s/include"
+                "D:/work/thirdparty/compiled/opencv452_s/include",
+                "D:/work/thirdparty/compiled/libtorch/include/torch/csrc/api/include"
             ],
             "defines": [
                 "_DEBUG",
