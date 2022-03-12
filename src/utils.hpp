@@ -2,7 +2,7 @@
 #include "string"
 #include "fstream"
 #include "numeric"
-
+#include "Windows.h"
 #include "opencv2/opencv.hpp"
 #include "torch/torch.h"
 
@@ -23,7 +23,7 @@ static constexpr const float _PI = 3.1415926f;
  * @return Ort::Value 
  */
 std::vector<torch::jit::IValue> create_tensor(const cv::Mat& mat, const torch::Device& device, bool half);
-
+std::string UTF8ToGB(const char* str);
 void Normalize(cv::Mat *im, const std::vector<float> &mean, 
               const std::vector<float> &scale, const bool is_scale);
 

@@ -46,12 +46,35 @@ void Normalize(cv::Mat *im, bool is_scale) {
   (*im).convertTo(*im, CV_32FC3, e);
 }
 
+std::string UTF8ToGB(const char* str)
+{
+    std::string result;
+    WCHAR* strSrc;
+    LPSTR szRes;
+
+    //获得临时变量的大小
+    int i = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0);
+    strSrc = new WCHAR[i + 1];
+    MultiByteToWideChar(CP_UTF8, 0, str, -1, strSrc, i);
+
+    //获得临时变量的大小
+    i = WideCharToMultiByte(CP_ACP, 0, strSrc, -1, NULL, 0, NULL, NULL);
+    szRes = new CHAR[i + 1];
+    WideCharToMultiByte(CP_ACP, 0, strSrc, -1, szRes, i, NULL, NULL);
+
+    result = szRes;
+    delete[]strSrc;
+    delete[]szRes;
+
+    return result;
+}
+
 int ReadDict(const std::string &path, std::vector<std::string> &m_vec){
   std::ifstream in(path);
   std::string line;
   if (in) {
     while (getline(in, line)) {
-      m_vec.push_back(line);
+      m_vec.push_back(UTF8ToGB(line.c_str()));
     }
   } else {
     std::cout << "no such label file: " << path << ", exit the program..."

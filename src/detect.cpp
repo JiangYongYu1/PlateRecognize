@@ -153,14 +153,9 @@ int Detect::postprocess(const torch::Tensor& detections,
                         float ratio_w,
                         DetectionResult &det_result)
 {
-    std::cout << detections.device() << std::endl;
     const float *heatmap_ = detections.data_ptr<float>();
     int fea_h = detections.size(2);
     int fea_w = detections.size(3);
-    std::cout << detections.size(0) << std::endl;
-    std::cout << detections.size(1) << std::endl;
-    std::cout << detections.size(2) << std::endl;
-    std::cout << detections.size(3) << std::endl;
     int spacial_size = fea_w * fea_h;
     const float *x0 = heatmap_ + spacial_size;
     const float *y0 = x0 + spacial_size;
@@ -272,7 +267,6 @@ int Detect::run(const cv::Mat &mat, DetectionResult& detect_result){
     torch::Tensor detections;
     detections = output_tensors.toTensor();
     detections = detections.to(torch::kFloat32).cpu();
-;   std::cout << detections.dtype() << std::endl;
     this->postprocess(detections, priv->threshold,
                       priv->nms_conf, resize_info.ratio_h,
                       resize_info.ratio_w, detect_result);

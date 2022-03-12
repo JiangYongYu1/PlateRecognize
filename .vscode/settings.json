@@ -62,6 +62,27 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "numeric": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "atomic": "cpp",
+        "bitset": "cpp",
+        "cinttypes": "cpp",
+        "clocale": "cpp",
+        "condition_variable": "cpp",
+        "cstdarg": "cpp",
+        "cwctype": "cpp",
+        "filesystem": "cpp",
+        "forward_list": "cpp",
+        "locale": "cpp",
+        "optional": "cpp",
+        "random": "cpp",
+        "stack": "cpp",
+        "string_view": "cpp",
+        "typeindex": "cpp",
+        "unordered_set": "cpp",
+        "valarray": "cpp",
+        "variant": "cpp",
+        "xlocbuf": "cpp",
+        "xlocmes": "cpp",
+        "__nullptr": "cpp"
     }
 }

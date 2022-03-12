@@ -180,7 +180,7 @@ int Recognize::postprocess(const torch::Tensor &output_tensors,
         // std::cout << output_near[i] << std::endl;
         if(output_near[i] - 1 >= 0)
         {
-            std::cout << output_near[i] - 1 << std::endl;
+            // std::cout << output_near[i] - 1 << std::endl;
             output_label.push_back(labels[output_near[i] - 1]);
         }
     }
