@@ -52,7 +52,7 @@ int Detect::resize_with_pad(const cv::Mat &img, cv::Mat &img_out, ResizeInfo &re
     const unsigned int new_shape_w = new_shape.width;
     const unsigned int new_shape_h = new_shape.height;
 
-    float r = ((float)(std::max(new_shape_w, new_shape_h))) / std::max(org_w, org_h);
+    float r = ((float)((std::max)(new_shape_w, new_shape_h))) / (std::max)(org_w, org_h);
     int new_unpad_w =  static_cast<int>(std::round(org_w * r));
     int new_unpad_h =  static_cast<int>(std::round(org_h * r));
 
